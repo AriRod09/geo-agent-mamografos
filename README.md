@@ -7,7 +7,7 @@ El agente utiliza inteligencia artificial generativa y análisis geoespacial par
 ## 🚀 Requisitos y Configuración
 
 1. **Clonar el repositorio:**
-   git clone https://github.com/TU_USUARIO/geo-agent-mamografos.git
+   git clone https://github.com/AriRod09/geo-agent-mamografos.git
 
 2. **Configurar el Token de IA:**
    * Crea un archivo llamado `.env` en la raíz del proyecto.
