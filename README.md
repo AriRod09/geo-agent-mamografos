@@ -18,6 +18,59 @@ El agente identifica automáticamente los establecimientos de salud que disponen
 
 El impacto esperado es mejorar la toma de decisiones de los gestores públicos mediante evidencia espacial, permitiendo orientar con mayor precisión la inversión pública, la adquisición o redistribución de mamógrafos, la implementación de campañas de tamizaje y la focalización de programas preventivos en las zonas con mayores brechas de acceso. De esta manera, el proyecto contribuye a una planificación sanitaria más eficiente, transparente y orientada a reducir las desigualdades territoriales en el acceso al diagnóstico oportuno del cáncer de mama.
 
+## 📋 Componentes Principales del Agente
+
+### 1. System Prompt: Instrucciones y Razonamiento General
+
+El **System Prompt** establece el rol, dominio técnico y directrices operativas que rigen el comportamiento del agente[cite: 1, 4]:
+
+* **Identidad y Rol:** Actúa como un *Analista de Salud Pública Geoespacial del Gobierno Peruano*[cite: 1].
+* **Objetivo:** Cruzar datos demográficos con capacidad hospitalaria instalada para diagnosticar la accesibilidad a tamizajes de cáncer de mama[cite: 1].
+* **Reglas de Negocio:**
+  * Define a la población objetivo como **mujeres de 40 a 69 años**[cite: 1].
+  * Clasifica el nivel de atención según el estado de la infraestructura disponible mediante un sistema de **Semaforización** (🟢 Verde, 🟡 Ámbar, 🔴 Rojo)[cite: 1, 3].
+  * Gatilla de forma obligatoria el cálculo de distancias cuando se identifica un distrito sin oferta (🔴 Rojo)[cite: 1, 3].
+
+---
+
+### 2. Tools: Herramientas Geoespaciales y de Datos
+
+El agente cuenta con 3 herramientas especializadas escritas en Python que extienden sus capacidades de análisis espacial[cite: 3, 4]:
+
+| Herramienta | Función | Justificación Técnica |
+| :--- | :--- | :--- |
+| **`cargar_bases_y_shapefile`** | Carga y normaliza los datasets (demanda de afiliadas y oferta RENIPRESS), estandariza claves `UBIGEO` a 6 dígitos y descarga los límites distritales en GeoJSON[cite: 3]. | Prepara la memoria de trabajo compartida (`_SESSION_DATA`) e independiza al LLM del procesamiento bruto de geometrías espaciales[cite: 3]. |
+| **`semaforizar_distrito`**[cite: 3] | Evalúa un distrito específico, suma la población objetivo y calcula la capacidad instalada estimada (Nivel III: 15,000 atenciones/año; Nivel II: 7,500 atenciones/año)[cite: 3]. | Aplica el algoritmo cuantitativo de brecha entre Oferta y Demanda para determinar el color del semáforo distrital[cite: 3]. |
+| **`calcular_mamografo_cercano`**[cite: 3] | Proyecta las geometrías a un sistema métrico (`EPSG:3857`), calcula el centroide del distrito sin oferta y mide la distancia Euclidiana (km) al mamógrafo más próximo[cite: 3]. | Resuelve la brecha de acceso ofreciendo una alternativa geográfica concreta de derivación para zonas desatendidas. |
+
+---
+
+### 3. Skills: Flujo Lógico y Conexión Autónoma de Tools
+
+El archivo `SKILL.md` define la "receta de razonamiento humano" que sigue el agente para resolver consultas complejas de manera secuencial[cite: 2, 4]:
+
+```text
+               [ 1. Carga de Entorno ]
+              cargar_bases_y_shapefile()
+                          │
+                          ▼
+            [ 2. Diagnóstico Distrital ]
+             semaforizar_distrito(distrito)
+                          │
+          ┌───────────────┴───────────────┐
+          ▼                               ▼
+  🟢 VERDE / 🟡 ÁMBAR                  🔴 ROJO
+(Capacidad evaluada)            (Sin mamógrafos)
+          │                               │
+          │                               ▼
+          │                   [ 3. Solución Espacial ]
+          │                 calcular_mamografo_cercano()
+          │                               │
+          └───────────────┬───────────────┘
+                          ▼
+             [ 4. Síntesis y Reporte ]
+          Generación de informe institucional
+
 ## 🚀 Requisitos y Configuración
 
 1. **Clonar el repositorio:**
