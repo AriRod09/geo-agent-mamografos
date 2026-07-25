@@ -9,11 +9,7 @@ El agente utiliza inteligencia artificial generativa y análisis geoespacial par
 1. **Clonar el repositorio:**
    git clone https://github.com/AriRod09/geo-agent-mamografos.git
 
-2. **Configurar el Token de IA:**
-   * Crea un archivo llamado `.env` en la raíz del proyecto.
-   * Copia el contenido de `.env.example` y añade tu API Key real de Gemini.
-
-3. **Librerías necesarias:**
+2. **Librerías necesarias:**
    Asegúrate de tener instaladas las siguientes librerías:
    pip install pandas geopandas shapely folium langchain-openai python-dotenv thefuzz[speedup]
 
