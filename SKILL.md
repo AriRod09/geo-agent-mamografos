@@ -1,30 +1,53 @@
 ---
 name: peru-mammography-analysis
-description: Analyse and evaluate the coverage and access to mammography services in Peru.
+description: Analiza y evalúa la cobertura y el acceso a servicios de mamografía en Perú.
 ---
-# Peru Mammography Analysis
+# Análisis de Mamografía en Perú
 
-## Overview
-This skill guides the agent to evaluate breast cancer screening coverage by crossing demographic demand with hospital installed capacity, producing a traffic-light alert (Semaforización).
+## Resumen
+Esta habilidad guía al agente para evaluar la cobertura de tamizaje de cáncer de mama,
+cruzando la demanda demográfica con la capacidad instalada de los hospitales, generando
+una alerta tipo semáforo (Semaforización) y, opcionalmente, un mapa interactivo de
+cobertura.
 
-## Tools Reference
+## Referencia de Herramientas (Tools)
 
 ### 1. cargar_bases_y_shapefile
-**Purpose:** Initialize environment, clean spatial coordinates, merge UBIGEON, and download the district boundaries.
-**Parameters:** None
+**Propósito:** Inicializar el entorno cargando la base pre-procesada de los 65 centros
+de salud con mamógrafo, la base de demanda poblacional y la capa distrital de Perú.
+Esta carga es rápida porque no realiza descargas ni limpiezas pesadas en tiempo real.
+**Parámetros:** Ninguno.
 
 ### 2. semaforizar_distrito
-**Purpose:** Evaluate the population (women 40-69) vs hospital category in a given district. Call AFTER charging databases.
-**Parameters:** 
-- `nombre_distrito` (str, required): The name of the Peruvian district to analyze.
+**Propósito:** Evaluar a la población objetivo (mujeres de 40 a 69 años) frente a la
+categoría hospitalaria de un distrito determinado. Debe ejecutarse DESPUÉS de cargar
+las bases.
+**Parámetros:**
+- `nombre_distrito` (str, requerido): Nombre del distrito peruano a analizar.
 
 ### 3. calcular_mamografo_cercano
-**Purpose:** Calculate the exact distance in km to the closest mammograph using spatial bounding. Call ONLY if the district returns ROJO (0 mammographs).
-**Parameters:** 
-- `nombre_distrito` (str, required): The name of the district.
+**Propósito:** Calcular la distancia exacta en kilómetros al mamógrafo disponible más
+cercano, usando cálculo espacial. Ejecutar SOLO si el distrito arroja resultado ROJO
+(0 mamógrafos).
+**Parámetros:**
+- `nombre_distrito` (str, requerido): Nombre del distrito.
 
-## Workflow Execution
-1. Always start by executing `cargar_bases_y_shapefile()` to load state.
-2. When the user asks about a district, run `semaforizar_distrito(nombre_distrito)`.
-3. If the result is "🔴 SEMÁFORO ROJO", immediately run `calcular_mamografo_cercano(nombre_distrito)` to provide the user with the closest available alternative.
-4. Synthesize the findings clearly.
+### 4. generar_mapa_cobertura
+**Propósito:** Generar un mapa interactivo en formato HTML (usando folium) que ubica
+el polígono del distrito evaluado y coloca marcadores en los centros de salud con
+mamógrafo disponibles en la zona. Guarda el archivo HTML resultante en disco.
+**Parámetros:**
+- `nombre_distrito` (str, requerido): Nombre del distrito a mapear.
+
+## Flujo de Ejecución (Workflow)
+1. Siempre comienza ejecutando `cargar_bases_y_shapefile()` para cargar el estado inicial.
+2. Cuando el usuario pregunte por un distrito, ejecuta `semaforizar_distrito(nombre_distrito)`.
+3. Si el resultado es "🔴 SEMÁFORO ROJO", ejecuta inmediatamente
+   `calcular_mamografo_cercano(nombre_distrito)` para ofrecer al usuario la alternativa
+   disponible más cercana.
+4. Si el usuario solicita una visualización, un mapa, o quiere "ver" la cobertura del
+   distrito, ejecuta `generar_mapa_cobertura(nombre_distrito)` y comparte la ruta del
+   archivo HTML generado.
+5. Sintetiza los hallazgos de forma clara y en español, indicando el estado del
+   semáforo, la demanda, la capacidad instalada y, si corresponde, la distancia al
+   establecimiento alternativo y la ruta del mapa generado.
