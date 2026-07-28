@@ -6,6 +6,13 @@ from pathlib import Path
 # Variables globales para compartir memoria en el agente
 _SESSION_DATA = {}
 
+def get_session_data():
+    return _SESSION_DATA
+
+# Agrega esto:
+def clear_session_data():
+    _SESSION_DATA.clear()
+
 
 def cargar_bases_y_shapefile() -> str:
     """
@@ -209,4 +216,9 @@ def generar_mapa_cobertura(nombre_distrito: str) -> str:
     ruta_salida = salida_dir / nombre_archivo
     mapa.save(str(ruta_salida))
 
+# Guardar el mapa en memoria para que Streamlit lo lea
+    _SESSION_DATA["pending_map"] = mapa
+    _SESSION_DATA["map_title"] = f"Mapa de Cobertura: {distrito_buscado}"
+    
     return f"Mapa de cobertura generado con éxito en: {ruta_salida}"
+   
